@@ -2,17 +2,37 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 const SPELLS = [
-  { name: "Swap", icon: "🔄", example: "Swap 1 ETH → best privacy token" },
-  { name: "Private Tx", icon: "🕵️‍♂️", example: "Send privately 50 ANO" },
-  { name: "DAO Contribution", icon: "🏛️", example: "Contribute 100 ANO to DAO" },
-  { name: "Escrow Payment", icon: "💰", example: "Lock 200 ANO for trade" }
+  { 
+    name: "Swap", 
+    icon: "🔄", 
+    example: "Swap 1 ETH → best privacy token",
+    description: "Simulate exchanging one token for another."
+  },
+  { 
+    name: "Private Tx", 
+    icon: "🕵️‍♂️", 
+    example: "Send privately 50 ANO",
+    description: "Send tokens privately without revealing sender/receiver."
+  },
+  { 
+    name: "DAO Contribution", 
+    icon: "🏛️", 
+    example: "Contribute 100 ANO to DAO",
+    description: "Contribute tokens to a DAO proposal or treasury."
+  },
+  { 
+    name: "Escrow Payment", 
+    icon: "💰", 
+    example: "Lock 200 ANO for trade",
+    description: "Lock tokens in an escrow contract for secure trading."
+  }
 ];
 
 const MOCK_FLOWS = {
-  Swap: ["Token A", "DEX", "Privacy Pool", "Token B"],
-  "Private Tx": ["Sender", "Mixer", "Receiver"],
-  "DAO Contribution": ["Wallet", "DAO Treasury", "Proposal"],
-  "Escrow Payment": ["Payer", "Escrow", "Payee"]
+  Swap: ["Token A → DEX → Privacy Pool → Token B"],
+  "Private Tx": ["Sender → Mixer → Receiver"],
+  "DAO Contribution": ["Wallet → DAO Treasury → Proposal"],
+  "Escrow Payment": ["Payer → Escrow → Payee"]
 };
 
 const STATUS_ICONS = {
@@ -26,6 +46,7 @@ export default function App() {
   const [log, setLog] = useState([]);
   const [executing, setExecuting] = useState(false);
   const [flow, setFlow] = useState([]);
+  const [currentDescription, setCurrentDescription] = useState("");
 
   const executeIntent = (intentName) => {
     const flowSteps = MOCK_FLOWS[intentName] || ["User Intent"];
@@ -43,33 +64,23 @@ export default function App() {
     if (!intent.trim()) return;
     executeIntent(intent);
     setIntent("");
+    setCurrentDescription("");
   };
 
   const handleSpellClick = (spell) => {
     executeIntent(spell.name);
+    setCurrentDescription(spell.description);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white flex flex-col relative overflow-hidden">
-      {/* Hero particles mock */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {[...Array(10)].map((_, i) => (
-          <motion.div key={i} className="absolute w-2 h-2 bg-purple-400 rounded-full animate-pulse"
-            initial={{ opacity: 0 }} animate={{ opacity: [0,1,0] }} transition={{ repeat: Infinity, duration: 4+i*0.3, repeatType: "loop" }}
-            style={{ top: `${Math.random()*100}%`, left: `${Math.random()*100}%` }}
-          />
-        ))}
-      </div>
-
       {/* Header */}
       <header className="p-6 border-b border-white/10 text-center z-10 relative">
         <h1 className="text-3xl font-bold tracking-wide">🔮 Anoma Intent Demo</h1>
-        <p className="text-slate-300 mt-1">
-          Prototype for intent-centric applications in Web3
-        </p>
+        <p className="text-slate-300 mt-1">Prototype for intent-centric applications in Web3</p>
       </header>
 
-      {/* Hero */}
+      {/* Hero + Info Panel */}
       <section className="p-10 text-center z-10 relative">
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
@@ -82,6 +93,11 @@ export default function App() {
         <p className="mt-4 text-lg text-slate-300 max-w-2xl mx-auto">
           Express your goals and let the system find the best way to fulfill them.
         </p>
+        {currentDescription && (
+          <div className="mt-4 p-3 bg-purple-800/50 rounded-lg inline-block text-slate-200">
+            {currentDescription}
+          </div>
+        )}
       </section>
 
       {/* Spells */}
@@ -89,7 +105,7 @@ export default function App() {
         {SPELLS.map((spell, i) => (
           <motion.div key={i} whileHover={{ scale: 1.05, rotate: 2 }} className="cursor-pointer group bg-purple-800/30 border border-purple-600 rounded-2xl px-5 py-3 flex flex-col items-center transition"
             onClick={() => handleSpellClick(spell)}
-            title={spell.example}
+            title={spell.description}
           >
             <span className="text-3xl">{spell.icon}</span>
             <span className="mt-2 font-semibold">{spell.name}</span>

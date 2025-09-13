@@ -4,19 +4,19 @@ import { motion } from "framer-motion";
 const SPELLS = [
   { 
     name: "Swap", icon: "🔄", example: "Swap 1 ETH → best privacy token",
-    description: "Simulate exchanging one token for another."
+    description: "Exchange one token for another via a privacy-preserving route."
   },
   { 
-    name: "Private Tx", icon: "🕵️‍♂️", example: "Send privately 50 ANO",
-    description: "Send tokens privately without revealing sender/receiver."
+    name: "Private Tx", icon: "🕵️‍♂️", example: "Send privately 50 XAN",
+    description: "Send tokens privately without revealing your identity."
   },
   { 
-    name: "DAO Contribution", icon: "🏛️", example: "Contribute 100 ANO to DAO",
+    name: "DAO Contribution", icon: "🏛️", example: "Contribute 100 XAN to DAO",
     description: "Contribute tokens to a DAO proposal or treasury."
   },
   { 
-    name: "Escrow Payment", icon: "💰", example: "Lock 200 ANO for trade",
-    description: "Lock tokens in an escrow contract for secure trading."
+    name: "Escrow Payment", icon: "💰", example: "Lock 200 XAN for trade",
+    description: "Lock tokens in escrow for secure trades."
   }
 ];
 
@@ -25,6 +25,21 @@ const MOCK_FLOWS = {
   "Private Tx": ["Sender → Mixer → Receiver"],
   "DAO Contribution": ["Wallet → DAO Treasury → Proposal"],
   "Escrow Payment": ["Payer → Escrow → Payee"]
+};
+
+const FLOW_EXPLANATIONS = {
+  "Token A → DEX → Privacy Pool → Token B": [
+    "Swap route", "Privacy Pool hides transaction", "Receive token B"
+  ],
+  "Sender → Mixer → Receiver": [
+    "Send token", "Mixer hides sender", "Receiver gets token"
+  ],
+  "Wallet → DAO Treasury → Proposal": [
+    "Select DAO", "Contribute XAN", "Proposal updated"
+  ],
+  "Payer → Escrow → Payee": [
+    "Lock in Escrow", "Funds held securely", "Release to payee"
+  ]
 };
 
 const STATUS_ICONS = { pending: "⏳", executed: "✅", failed: "❌" };
@@ -38,15 +53,14 @@ export default function App() {
   const [hoverParticles, setHoverParticles] = useState([]);
   const [flowParticles, setFlowParticles] = useState([]);
   const [logParticles, setLogParticles] = useState([]);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const executeIntent = (intentName) => {
     const flowSteps = MOCK_FLOWS[intentName] || ["User Intent"];
     setFlow(flowSteps);
     setLog(prev => [...prev, { type: "intent", text: intentName, status: "pending" }]);
     setExecuting(true);
-    // Flow particles
     triggerFlowParticles();
-    // Log particles
     triggerLogParticles();
     setTimeout(() => {
       setLog(prev => [...prev, { type: "system", text: `Executed: ${intentName}`, status: "executed" }]);
@@ -91,7 +105,7 @@ export default function App() {
     setCurrentDescription(spell.description);
   };
 
-  const handleSpellHover = (e) => {
+  const handleSpellHover = () => {
     const particles = Array.from({length: 8}).map(() => ({
       x: Math.random() * 60 - 30,
       y: Math.random() * 30,
@@ -108,6 +122,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white flex flex-col relative overflow-hidden">
       
+      {/* Onboarding Panel */}
+      {showOnboarding && (
+        <motion.div initial={{y:-50, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:0.5}}
+          className="absolute top-6 left-1/2 -translate-x-1/2 bg-purple-800/70 p-4 rounded-xl shadow-lg z-20 max-w-lg w-[90%] text-center">
+          <p>Welcome! Express your intent (e.g., swap tokens, send privately) and see how the system would fulfill it.</p>
+          <button onClick={() => setShowOnboarding(false)} className="mt-2 px-3 py-1 bg-purple-600 rounded hover:bg-purple-700 transition text-sm">Got it!</button>
+        </motion.div>
+      )}
+
       {/* Background Particles */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {[...Array(particleCount)].map((_, i) => (
@@ -162,16 +185,6 @@ export default function App() {
             <span className="text-2xl sm:text-3xl">{spell.icon}</span>
             <span className="mt-1 sm:mt-2 font-semibold text-sm sm:text-base">{spell.name}</span>
             <span className="text-xs text-purple-300 mt-1 opacity-0 group-hover:opacity-100 transition">{spell.example}</span>
-
-            {/* Hover Particles */}
-            {hoverParticles.map(p => (
-              <motion.div key={p.id} className="absolute rounded-full bg-purple-400"
-                style={{width: p.size, height: p.size, top: "50%", left: "50%"}}
-                initial={{opacity: p.opacity, x:0, y:0}}
-                animate={{opacity:0, x: p.x, y: -p.y-20}}
-                transition={{duration: 0.8}}
-              />
-            ))}
           </motion.div>
         ))}
       </section>
@@ -191,22 +204,15 @@ export default function App() {
             {flow.map((step, i) => (
               <motion.div key={i} 
                 whileHover={{ boxShadow: "0 0 15px rgba(255,0,255,0.6)" }}
-                onMouseEnter={triggerFlowParticles}
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y:0 }} transition={{ delay: i*0.25 }}
                 className="px-2 sm:px-3 py-2 rounded-xl bg-gradient-to-r from-purple-600/60 to-pink-500/60 text-center flex-1 shadow-md text-sm sm:text-base relative"
               >
                 {step}
-                {i < flow.length - 1 && <span className="absolute sm:relative sm:ml-1 text-white/60">→</span>}
-
-                {/* Flow Particles */}
-                {flowParticles.map(p => (
-                  <motion.div key={p.id} className="absolute rounded-full bg-pink-400"
-                    style={{width: p.size, height: p.size, top: "50%", left: "50%"}}
-                    initial={{opacity: p.opacity, x:0, y:0}}
-                    animate={{opacity:0, x: p.x, y: -p.y-15}}
-                    transition={{duration: 0.8}}
-                  />
-                ))}
+                {FLOW_EXPLANATIONS[step] && (
+                  <div className="mt-1 text-xs text-purple-300">
+                    {FLOW_EXPLANATIONS[step].join(" → ")}
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -226,20 +232,9 @@ export default function App() {
                   entry.status === "executed" ? "bg-green-500/20 text-green-200 shadow-md" :
                   "bg-red-500/20 text-red-200 shadow-md"
                 }`}
-                onMouseEnter={triggerLogParticles}
               >
                 <span>{STATUS_ICONS[entry.status || "pending"]}</span>
                 <span className="ml-2">{entry.text}</span>
-
-                {/* Log Particles */}
-                {logParticles.map(p => (
-                  <motion.div key={p.id} className="absolute rounded-full bg-green-400"
-                    style={{width: p.size, height: p.size, top: "50%", left: "50%"}}
-                    initial={{opacity: p.opacity, x:0, y:0}}
-                    animate={{opacity:0, x: p.x, y: -p.y-15}}
-                    transition={{duration: 0.8}}
-                  />
-                ))}
               </motion.div>
             ))}
             {executing && (

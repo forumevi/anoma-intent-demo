@@ -3,27 +3,19 @@ import { motion } from "framer-motion";
 
 const SPELLS = [
   { 
-    name: "Swap", 
-    icon: "🔄", 
-    example: "Swap 1 ETH → best privacy token",
+    name: "Swap", icon: "🔄", example: "Swap 1 ETH → best privacy token",
     description: "Simulate exchanging one token for another."
   },
   { 
-    name: "Private Tx", 
-    icon: "🕵️‍♂️", 
-    example: "Send privately 50 ANO",
+    name: "Private Tx", icon: "🕵️‍♂️", example: "Send privately 50 ANO",
     description: "Send tokens privately without revealing sender/receiver."
   },
   { 
-    name: "DAO Contribution", 
-    icon: "🏛️", 
-    example: "Contribute 100 ANO to DAO",
+    name: "DAO Contribution", icon: "🏛️", example: "Contribute 100 ANO to DAO",
     description: "Contribute tokens to a DAO proposal or treasury."
   },
   { 
-    name: "Escrow Payment", 
-    icon: "💰", 
-    example: "Lock 200 ANO for trade",
+    name: "Escrow Payment", icon: "💰", example: "Lock 200 ANO for trade",
     description: "Lock tokens in an escrow contract for secure trading."
   }
 ];
@@ -35,11 +27,7 @@ const MOCK_FLOWS = {
   "Escrow Payment": ["Payer → Escrow → Payee"]
 };
 
-const STATUS_ICONS = {
-  pending: "⏳",
-  executed: "✅",
-  failed: "❌"
-};
+const STATUS_ICONS = { pending: "⏳", executed: "✅", failed: "❌" };
 
 export default function App() {
   const [intent, setIntent] = useState("");
@@ -74,6 +62,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white flex flex-col relative overflow-hidden">
+      
+      {/* Mystic particles background */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <motion.div key={i} className="absolute w-2 h-2 bg-purple-400 rounded-full blur-md"
+            initial={{ opacity: 0 }} animate={{ opacity: [0,1,0] }} 
+            transition={{ repeat: Infinity, duration: 4 + i*0.3, repeatType: "loop", yoyo: Infinity }}
+            style={{ top: `${Math.random()*100}%`, left: `${Math.random()*100}%` }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
       <header className="p-6 border-b border-white/10 text-center z-10 relative">
         <h1 className="text-3xl font-bold tracking-wide">🔮 Anoma Intent Demo</h1>
@@ -94,16 +94,20 @@ export default function App() {
           Express your goals and let the system find the best way to fulfill them.
         </p>
         {currentDescription && (
-          <div className="mt-4 p-3 bg-purple-800/50 rounded-lg inline-block text-slate-200">
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+            className="mt-4 p-3 bg-purple-800/50 rounded-lg inline-block text-slate-200 shadow-lg"
+          >
             {currentDescription}
-          </div>
+          </motion.div>
         )}
       </section>
 
       {/* Spells */}
       <section className="p-6 flex flex-wrap justify-center gap-4 z-10 relative">
         {SPELLS.map((spell, i) => (
-          <motion.div key={i} whileHover={{ scale: 1.05, rotate: 2 }} className="cursor-pointer group bg-purple-800/30 border border-purple-600 rounded-2xl px-5 py-3 flex flex-col items-center transition"
+          <motion.div key={i} whileHover={{ scale: 1.08, rotate: 2, boxShadow: "0 0 20px rgba(128,0,255,0.7)" }} 
+            className="cursor-pointer group bg-purple-800/30 border border-purple-600 rounded-2xl px-5 py-3 flex flex-col items-center transition"
             onClick={() => handleSpellClick(spell)}
             title={spell.description}
           >
@@ -125,9 +129,10 @@ export default function App() {
 
         {/* Flow Visualizer */}
         {flow.length > 0 && (
-          <div className="w-full max-w-3xl mb-6 p-4 bg-slate-800/50 rounded-2xl flex justify-between relative">
+          <div className="w-full max-w-3xl mb-6 p-4 bg-gradient-to-r from-purple-700/30 to-indigo-900/30 rounded-2xl flex justify-between relative shadow-lg">
             {flow.map((step, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y:0 }} transition={{ delay: i*0.25 }} className="px-3 py-2 rounded-xl bg-purple-600/40 text-center flex-1 mx-1 relative">
+              <motion.div key={i} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y:0 }} transition={{ delay: i*0.25 }}
+                className="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-600/60 to-pink-500/60 text-center flex-1 mx-1 relative shadow-md">
                 {step}
                 {i < flow.length - 1 && <span className="absolute right-0 top-1/2 transform translate-x-3 -translate-y-1/2 text-white/60">→</span>}
               </motion.div>
@@ -136,7 +141,7 @@ export default function App() {
         )}
 
         {/* Quest Log */}
-        <div className="w-full max-w-3xl bg-slate-800/60 rounded-2xl p-4 border border-slate-700 overflow-y-auto max-h-[300px]">
+        <div className="w-full max-w-3xl bg-slate-800/60 rounded-2xl p-4 border border-slate-700 overflow-y-auto max-h-[300px] shadow-lg">
           <h3 className="text-lg font-semibold mb-2">Quest Log</h3>
           <div className="space-y-2">
             {log.map((entry, i) => (
@@ -145,9 +150,9 @@ export default function App() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
                 className={`p-2 rounded-lg flex items-center justify-between ${
-                  entry.status === "pending" ? "bg-yellow-500/20 text-yellow-200" :
-                  entry.status === "executed" ? "bg-green-500/20 text-green-200" :
-                  "bg-red-500/20 text-red-200"
+                  entry.status === "pending" ? "bg-yellow-500/20 text-yellow-200 shadow-md" :
+                  entry.status === "executed" ? "bg-green-500/20 text-green-200 shadow-md" :
+                  "bg-red-500/20 text-red-200 shadow-md"
                 }`}
               >
                 <span>{STATUS_ICONS[entry.status || "pending"]}</span>
@@ -155,7 +160,8 @@ export default function App() {
               </motion.div>
             ))}
             {executing && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ repeat: Infinity, duration: 1, repeatType: "reverse" }} className="p-2 rounded-lg bg-yellow-500/20 text-yellow-200 flex items-center">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ repeat: Infinity, duration: 1, repeatType: "reverse" }} 
+                className="p-2 rounded-lg bg-yellow-500/20 text-yellow-200 flex items-center shadow-lg animate-pulse">
                 ⏳ Executing intent...
               </motion.div>
             )}
